@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+namespace,名称空间
+1 起别名 不一样的字段名称后面加as 进行更改
+、2sql片段
+3
+-->
+<mapper namespace="com.itheima.mapper.BrandMapper">
+<!--2-->
+<!--<sql id="brand_column">-->
+<!--    id,brand_name as brandName,company_name as companyName,ordered,description,status-->
+<!--</1sql>-->
+<resultMap id="brandResultMap" type="com.itheima.pojo.Brand">
+    <result column="brand_name" property="brandName"/>
+    <result column="company_name" property="companyName" />
+</resultMap>
+    <select id="selectAll" resultMap="brandResultMap">
+select * from tb_brand;
+<!--  2      select <include refid="brand_column"/>from tb_brand;-->
+</select>
+    <select id="selectById" resultMap="brandResultMap">
+        select * from tb_brand where id
+         <![CDATA[
+         <
+         ]]>
+         #{id};
+    </select>
+<!--<![CDATA[-->
+<!--这里可以写特殊符号-->
+<!--]]>-->
+    <!-- 3条件查询-->
+<!--    <select id="selectCondition" resultMap="brandResultMap">-->
+<!--        select * from tb_brand where-->
+<!--        status =#{status}-->
+<!--        and  company_name like #{companyName}-->
+<!--        and brand_name like #{brandName}-->
+<!--    4动态条件查询-->
+<!--    会报错可以用
+1恒等式     在where后面加1=1  把第一个语句前面加and  陪成相同的
+2where 标签
+
+-->
+    <select id="selectCondition" parameterType="com.itheima.pojo.Brand" resultMap="brandResultMap">
+        select * from tb_brand
+/*where*/
+<where>
+        <if test="status  !=null">
+            status =#{status}
+        </if>
+        <if test="companyName !=null and companyName !=''">
+            and  company_name like #{companyName}
+        </if>
+        <if test="brandName !=null and brand_name !=''">
+            and brand_name like #{brandName}
+        </if>
+</where>
+    </select>
+
+    <select id="selectSingle" parameterType="com.itheima.pojo.Brand" resultMap="brandResultMap">
+        select * from tb_brand
+        <where>
+        <choose>
+
+        <when test="status != null">
+            status =#{status}
+        </when>
+        <when test="companyName !=null and companyName !=''">
+            company_name like #{companyName}
+        </when>
+        <when test="brandName !=null and brandName !=''">
+            brand_name like #{brandName}
+        </when>
+
+     </choose>
+        </where>
+    </select>
+
+    <!--    </select>-->
+<!--    <select id="selectAll" resultType="com.itheima.pojo.Brand">-->
+<!--        select * from tb_brand;-->
+<!--    </select>-->
+<!--    参数占位符
+#{}可以防止SQL注入
+
+${}不可以
+表名列名不固定的情况下可以使用
+添加id返回-->
+    <insert id="add" useGeneratedKeys="true" keyProperty="id">
+     insert into tb_brand (brand_name, company_name, ordered, description, status)
+      value
+      (#{brandName},#{companyName},#{ordered},#{description},#{status});
+    </insert>
+
+<!--更改-->
+<!--    <update id="update">-->
+<!--        update tb_brand-->
+<!--        set-->
+<!--        brand_name = #{brandName},-->
+<!--        company_name = #{companyName},-->
+<!--        ordered = #{ordered},-->
+<!--        description =#{description},-->
+<!--        status = #{status}-->
+<!--   where id =#{id}-->
+<!--    </update>-->
+<!--条件更改-->
+        <update id="update">
+            update tb_brand
+            <set>
+            <if test="status  !=null">
+                status =#{status}
+            </if>
+            <if test="companyName !=null and companyName !=''">
+                 and company_name = #{companyName}
+            </if>
+            <if test="brandName !=null and brandName !=''">
+                and brand_name = #{brandName}
+            </if>
+            <if test="ordered !=null ">
+                and ordered = #{ordered}
+            </if>
+            <if test="description !=null and description !=''">
+                and description =#{description},
+            </if>
+        </set>
+       where id =#{id}
+        </update>
+<!--    删除-->
+    <delete id="deleteById">
+        delete from tb_brand where id =#{id}
+    </delete>
+<!--    mybatis会将数组封装为一个map集合
+1默认  array=数组
+2   用@Param注解改变默认名称
+-->
+    <delete id="deleteByIds">
+        delete from tb_brand where id in (<foreach collection="ids" item="id" separator=",">
+        #{id}
+    </foreach>
+        );
+    </delete>
+</mapper>
